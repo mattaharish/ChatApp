@@ -1,5 +1,5 @@
 # ChatApp
-####A web-based chatting application developed using Node JS, Mongo, Socket.io, EJS. 
+#### A web-based chatting application developed using Node JS, Mongo, Socket.io, EJS. 
 
 ### Application Description:
 1. Login and signup module using bcrypt(password hashing) and sessions.
