@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!-- This file has been downloaded from Bootsnipp.com. Enjoy! -->
+    <title>Socket IO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Sans:400,700">
+
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="http://cdn.socket.io/socket.io-1.4.5.js"></script>
+</head>
+
+<body>
+<input type="hidden" value= <%= user %> id="user" />
+<input type="hidden" value= <%= to %> id="to" />
+
+<br>
+<a href="http://localhost:8000/users/online"><button class="btn btn-primary">Online Users</button></a>
+<a href="http://localhost:8000/logout"><button class="btn btn-danger">Logout</button></a>
+<br>
+<div id="live-chat">
+
+        
+        <ul id="wentoffline"></ul>
+
+		<header class="clearfix">
+
+			<h4><%= to %></h4>
+
+            <h6 id="type">typing… </h6>
+
+			<span class="chat-message-counter">3</span>
+
+		</header>
+
+		<div class="chat">
+			
+			<div class="chat-history">
+				
+                <ul id="pchat"></ul>
+				
+			</div> <!-- end chat-history -->
+
+			<!--<p class="chat-feedback">Your partner is typing…</p>-->
+
+			<form>
+
+				<fieldset>
+					
+					<input type="text" autocomplete="off" id="message" placeholder="Type your message…" autofocus>
+
+				</fieldset>
+
+			</form>
+
+		</div> <!-- end chat -->
+
+	</div> <!-- end live-chat -->
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+        var socket = io();
+
+        var user = $("#user").val();
+        var to = $("#to").val();
+
+
+        var from_to = {'from':user,'to':to};
+
+        socket.emit('load-all-messages', from_to);
+
+        socket.emit('username', user);
+        
+        socket.emit('loggedInUser', user);
+
+        $("#type").hide();
+
+        var timeout;
+
+        function timeoutFunction() {
+            typing = false;
+            socket.emit("typingout", to);
+        }
+
+        $('#message').keyup(function() {
+            
+            typing = true;
+            socket.emit('typing', to);
+            clearTimeout(timeout);
+            timeout = setTimeout(timeoutFunction, 5000);
+        });
+
+        socket.on('typing', function(data) {
+
+            $("#type").show();
+       });
+
+       socket.on('typingout', function(data){
+
+           $("#type").hide();
+       });
+
+       socket.on('wentOffline', function(data){
+           var offline = '<li>'+
+                            '<b><h4>'+
+                            data+
+                            '</h4></b>'+
+                            '</li>';
+            $("#wentoffline").append(offline);
+       });
+
+
+        socket.on('all-messages', function(messagedata){
+            messagedata.forEach(function(message){
+                previousChat(message.from, message.message,message.date);
+            });
+        }); 
+
+          $('form').submit(function(){
+
+            var msg = $("#message").val();
+            var data = {"from":user, "to":to, "msg":msg};
+            socket.emit('chat message', data);
+            $("#message").val('');
+            return false;
+
+         });
+
+      socket.on('chat message', function(data){
+
+          insertChat(data.from,data.msg);
+      });
+            
+    //-- No use time. It is a javaScript effect.
+
+    function previousChat(who, text, date){
+        var control = "";
+        var d = new Date(date).toString().slice(0,21);
+        control = '<div class="chat-message clearfix">'+
+					'<div class="chat-message-content clearfix">'+
+						'<span class="chat-time">'+d+'</span>'+
+						'<h4 style="color:green">'+who+'</h5>'+
+						'<p>'+text+'</p>'+
+					'</div>'+
+				'</div>';
+
+        $("#pchat").append(control);
+    }
+
+    function insertChat(who, text){
+        var control = "";
+        var d = Date.now();
+        var date = new Date(d).toString().slice(0,21);
+        control ='<div class="chat-message clearfix">'+
+					'<div class="chat-message-content clearfix">'+
+						'<span class="chat-time">'+date+'</span>'+
+						'<h5 style="color:green">'+who+'</h5>'+
+						'<p>'+text+'</p>'+
+					'</div>'+
+				'</div>';       
+
+        $("#pchat").append(control);
+        
+    }
+    
+});
+
+</script>
+</body>
+</html>
