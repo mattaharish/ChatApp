@@ -35,3 +35,10 @@
 - Previous conversations with that user(If any) will be loaded on entering to the chatbox page.
 - If two users are online and start texting each-other, you can see "typing.." quote just below the name of the user(like in whatsapp).
 - While chatting, if user goes back to previous page or logged out, a notification "<username> is offline" will be appeared at top of chatbox.
+
+### Deployment:
+
+- Application is deployed into AWS cloud.
+- Application is running on "Ubuntu 16.04".
+- Web-Server: Nginx
+- Database is hosted in "mLab"(Database Service Provider).
